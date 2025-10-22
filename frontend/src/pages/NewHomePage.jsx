@@ -26,12 +26,12 @@ const NewHomePage = () => {
       {/* Banner Principal */}
       <ResponsiveBanner
         image="/src/assets/images/hero_banner_logistica_urbana.jpg"
-        alt="Logística Urbana Inteligente"
-        title="Logística Urbana Inteligente"
+        alt="Logística urbana integrada"
+        title="Logística urbana integrada, rápida e inteligente"
         subtitle="Impulsionando o futuro"
-        description="Movemos cargas de forma rápida, segura e inteligente para o sucesso da sua cadeia de suprimentos urbana."
-        buttonText="Simular Frete"
-        buttonLink="/simulador-frete"
+        description="Conectamos embarcadores, transportadores e entregadores em uma plataforma única e eficiente"
+        buttonText="Enviar Agora"
+        buttonLink="/contato"
         buttonColor="#822b98"
       />
       
