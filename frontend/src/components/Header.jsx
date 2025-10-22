@@ -7,13 +7,13 @@ const Header = () => {
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-6">
           <div className="flex items-center">
             <a href="/" className="flex items-center">
               <img 
                 src="/src/assets/images/sameday_logo.png" 
                 alt="SameDay Logo" 
-                className="h-8 w-auto"
+                className="h-12 w-auto"
                 loading="eager"
                 decoding="async"
               />
@@ -27,8 +27,7 @@ const Header = () => {
             <div className="relative">
               <button 
                 className="text-gray-900 hover:text-purple-600 transition-colors flex items-center"
-                onMouseEnter={() => setPerfisOpen(true)}
-                onMouseLeave={() => setPerfisOpen(false)}
+                onClick={() => setPerfisOpen(!perfisOpen)}
               >
                 Perfis
                 <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,16 +35,12 @@ const Header = () => {
                 </svg>
               </button>
               {perfisOpen && (
-                <div 
-                  className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50"
-                  onMouseEnter={() => setPerfisOpen(true)}
-                  onMouseLeave={() => setPerfisOpen(false)}
-                >
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50 border">
                   <div className="py-1">
-                    <a href="/embarcador" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Embarcador</a>
-                    <a href="/transportador" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Transportador</a>
-                    <a href="/entregador" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Entregador</a>
-                    <a href="/stock-store" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Stock Store</a>
+                    <a href="/embarcador" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setPerfisOpen(false)}>Embarcador</a>
+                    <a href="/transportador" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setPerfisOpen(false)}>Transportador</a>
+                    <a href="/entregador" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setPerfisOpen(false)}>Entregador</a>
+                    <a href="/stock-store" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setPerfisOpen(false)}>Stock Store</a>
                   </div>
                 </div>
               )}
@@ -55,8 +50,7 @@ const Header = () => {
             <div className="relative">
               <button 
                 className="text-gray-900 hover:text-purple-600 transition-colors flex items-center"
-                onMouseEnter={() => setSimuladoresOpen(true)}
-                onMouseLeave={() => setSimuladoresOpen(false)}
+                onClick={() => setSimuladoresOpen(!simuladoresOpen)}
               >
                 Simuladores
                 <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,14 +58,10 @@ const Header = () => {
                 </svg>
               </button>
               {simuladoresOpen && (
-                <div 
-                  className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50"
-                  onMouseEnter={() => setSimuladoresOpen(true)}
-                  onMouseLeave={() => setSimuladoresOpen(false)}
-                >
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50 border">
                   <div className="py-1">
-                    <a href="/simulador-frete" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Simulador de Frete</a>
-                    <a href="/simulador-armazenagem" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Simulador de Armazenagem</a>
+                    <a href="/simulador-frete" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setSimuladoresOpen(false)}>Simulador de Frete</a>
+                    <a href="/simulador-armazenagem" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setSimuladoresOpen(false)}>Simulador de Armazenagem</a>
                   </div>
                 </div>
               )}

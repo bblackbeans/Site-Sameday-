@@ -25,7 +25,7 @@ const NewHomePage = () => {
 
       {/* Banner Principal */}
       <ResponsiveBanner
-        image="/src/assets/images/hero_banner_truck.webp"
+        image="/src/assets/images/hero_banner_logistica_urbana.jpg"
         alt="Logística urbana integrada"
         title="Logística urbana integrada, rápida e inteligente"
         subtitle="Impulsionando o futuro"
