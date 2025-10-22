@@ -1,26 +1,81 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Header = () => {
+  const [perfisOpen, setPerfisOpen] = useState(false);
+  const [simuladoresOpen, setSimuladoresOpen] = useState(false);
+
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
             <a href="/" className="flex items-center">
-              <div className="flex items-center">
-                <span className="text-2xl font-bold text-purple-600">Same</span>
-                <span className="text-2xl font-bold text-gray-800 ml-1">Day</span>
-                <div className="ml-2">
-                  <div className="text-xs text-gray-600">Logística Inteligente</div>
-                </div>
-              </div>
+              <img 
+                src="/src/assets/images/sameday_logo.png" 
+                alt="SameDay Logo" 
+                className="h-8 w-auto"
+                loading="eager"
+                decoding="async"
+              />
             </a>
           </div>
           <nav className="hidden md:flex space-x-8">
             <a href="/" className="text-gray-900 hover:text-purple-600 transition-colors">Sobre a SameDay</a>
             <a href="/embarcador" className="text-gray-900 hover:text-purple-600 transition-colors">Como Funciona</a>
-            <a href="/transportador" className="text-gray-900 hover:text-purple-600 transition-colors">Perfis</a>
-            <a href="/simulador-frete" className="text-gray-900 hover:text-purple-600 transition-colors">Simuladores</a>
+            
+            {/* Dropdown Perfis */}
+            <div className="relative">
+              <button 
+                className="text-gray-900 hover:text-purple-600 transition-colors flex items-center"
+                onMouseEnter={() => setPerfisOpen(true)}
+                onMouseLeave={() => setPerfisOpen(false)}
+              >
+                Perfis
+                <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {perfisOpen && (
+                <div 
+                  className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50"
+                  onMouseEnter={() => setPerfisOpen(true)}
+                  onMouseLeave={() => setPerfisOpen(false)}
+                >
+                  <div className="py-1">
+                    <a href="/embarcador" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Embarcador</a>
+                    <a href="/transportador" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Transportador</a>
+                    <a href="/entregador" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Entregador</a>
+                    <a href="/stock-store" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Stock Store</a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Dropdown Simuladores */}
+            <div className="relative">
+              <button 
+                className="text-gray-900 hover:text-purple-600 transition-colors flex items-center"
+                onMouseEnter={() => setSimuladoresOpen(true)}
+                onMouseLeave={() => setSimuladoresOpen(false)}
+              >
+                Simuladores
+                <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {simuladoresOpen && (
+                <div 
+                  className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50"
+                  onMouseEnter={() => setSimuladoresOpen(true)}
+                  onMouseLeave={() => setSimuladoresOpen(false)}
+                >
+                  <div className="py-1">
+                    <a href="/simulador-frete" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Simulador de Frete</a>
+                    <a href="/simulador-armazenagem" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Simulador de Armazenagem</a>
+                  </div>
+                </div>
+              )}
+            </div>
           </nav>
           
           {/* Botão Fale Conosco */}
