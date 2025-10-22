@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import samedayLogo from '../assets/images/sameday_logo.png';
 
 const Header = () => {
   const [perfisOpen, setPerfisOpen] = useState(false);
@@ -11,7 +12,7 @@ const Header = () => {
           <div className="flex items-center">
             <a href="/" className="flex items-center">
               <img 
-                src="/src/assets/images/sameday_logo.png" 
+                src={samedayLogo} 
                 alt="SameDay Logo" 
                 className="h-12 w-auto"
                 loading="eager"
@@ -20,14 +21,17 @@ const Header = () => {
             </a>
           </div>
           <nav className="hidden md:flex space-x-8">
-            <a href="/" className="text-gray-900 hover:text-purple-600 transition-colors">Sobre a SameDay</a>
-            <a href="/embarcador" className="text-gray-900 hover:text-purple-600 transition-colors">Como Funciona</a>
+            <a href="#sobre" className="text-gray-900 hover:text-purple-600 transition-colors">Sobre a SameDay</a>
+            <a href="#como-funciona" className="text-gray-900 hover:text-purple-600 transition-colors">Como Funciona</a>
             
             {/* Dropdown Perfis */}
             <div className="relative">
               <button 
                 className="text-gray-900 hover:text-purple-600 transition-colors flex items-center"
-                onClick={() => setPerfisOpen(!perfisOpen)}
+                onClick={() => {
+                  setPerfisOpen(!perfisOpen);
+                  setSimuladoresOpen(false);
+                }}
               >
                 Perfis
                 <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +54,10 @@ const Header = () => {
             <div className="relative">
               <button 
                 className="text-gray-900 hover:text-purple-600 transition-colors flex items-center"
-                onClick={() => setSimuladoresOpen(!simuladoresOpen)}
+                onClick={() => {
+                  setSimuladoresOpen(!simuladoresOpen);
+                  setPerfisOpen(false);
+                }}
               >
                 Simuladores
                 <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
