@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/* CSS básico para teste */
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Títulos usam Plus Jakarta Sans */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+.bg-blue-500 {
+  background-color: #3b82f6 !important;
+}
+
+.text-white {
+  color: white !important;
+}
+
+.p-4 {
+  padding: 1rem !important;
+}
+
+/* Cor primária personalizada */
+:root {
+  --primary-purple: #6a2480;
+  --primary-purple-hover: #5a1f6e;
+  --primary-purple-light: #f8f4f9;
+}
+
+.bg-primary-purple {
+  background-color: var(--primary-purple) !important;
+}
+
+.bg-primary-purple-hover {
+  background-color: var(--primary-purple-hover) !important;
+}
+
+.text-primary-purple {
+  color: var(--primary-purple) !important;
+}
+
+.border-primary-purple {
+  border-color: var(--primary-purple) !important;
+}
+
+.hover\:bg-primary-purple:hover {
+  background-color: var(--primary-purple) !important;
+}
+
+.hover\:text-primary-purple:hover {
+  color: var(--primary-purple) !important;
+}
+
+.hover\:border-primary-purple:hover {
+  border-color: var(--primary-purple) !important;
+}
+
+/* Gradientes com cor primária */
+.from-primary-purple {
+  background-image: linear-gradient(to right, var(--primary-purple), var(--primary-purple)) !important;
+}
+
+.to-primary-purple {
+  background-image: linear-gradient(to right, var(--primary-purple), var(--primary-purple)) !important;
+}
+
+.to-primary-purple-hover {
+  background-image: linear-gradient(to right, var(--primary-purple-hover), var(--primary-purple-hover)) !important;
+}
+
+.bg-gradient-to-br.from-primary-purple.to-primary-purple-hover {
+  background: linear-gradient(to bottom right, var(--primary-purple), var(--primary-purple-hover)) !important;
+}
