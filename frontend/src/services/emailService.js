@@ -1,4 +1,4 @@
-// Sistema de envio de emails via API AdonisJS
+// Sistema de envio de emails via API AdonisJS - VERSÃO CORRIGIDA
 const API_BASE_URL = 'https://sameday-sameday-api.psvs5z.easypanel.host/v2';
 
 /**
