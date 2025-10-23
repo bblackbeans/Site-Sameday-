@@ -1,5 +1,5 @@
 // Sistema de envio de emails via API AdonisJS
-const API_BASE_URL = 'https://sameday-sameday-api.psvs5z.easypanel.host';
+const API_BASE_URL = 'https://sameday-sameday-api.psvs5z.easypanel.host/v2';
 
 class EmailService {
   /**
