@@ -10,28 +10,17 @@ const useFormSubmission = () => {
     setSubmitStatus(null);
 
     try {
-      let result;
-      
-      // Escolher a função de envio baseada no tipo de formulário
-      switch (formType) {
-        case 'contact':
-          result = await emailService.sendContactEmail(formData);
-          break;
-        case 'embarcador':
-          result = await emailService.sendShipperEmail(formData);
-          break;
-        case 'transportador':
-          result = await emailService.sendCarrierEmail(formData);
-          break;
-        case 'stock-store':
-          result = await emailService.sendStockStoreEmail(formData);
-          break;
-        case 'entregador':
-          result = await emailService.sendDeliveryPersonEmail(formData);
-          break;
-        default:
-          result = await emailService.sendContactEmail(formData);
-      }
+      // Mapear tipos de formulário para funções de envio
+      const senders = {
+        contact:       sendContactEmail,
+        embarcador:    sendShipperEmail,
+        transportador: sendCarrierEmail,
+        'stock-store': sendStockStoreEmail,
+        entregador:    sendDeliveryPersonEmail,
+      };
+
+      const sender = senders[formType] || sendContactEmail;
+      const result = await sender(formData);
 
       if (result.success) {
         setSubmitStatus('success');
