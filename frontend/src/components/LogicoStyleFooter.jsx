@@ -1,8 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, ArrowRight } from 'lucide-react';
+import { Phone, Mail, MapPin, ArrowRight, CheckCircle, XCircle } from 'lucide-react';
+import useFormSubmission from '../hooks/useFormSubmission';
 
 const LogicoStyleFooter = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+
+  const { isSubmitting, submitStatus, submitForm } = useFormSubmission();
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const success = await submitForm(formData, 'contact');
+    
+    // Reset form only on success
+    if (success) {
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+    }
+  };
   return (
     <footer className="bg-gray-900 text-white">
       {/* Get in Touch Section */}
@@ -73,36 +105,52 @@ const LogicoStyleFooter = () => {
             {/* Right Side - Contact Form */}
             <div>
               <h3 className="text-2xl font-bold text-white mb-6">Entre em Contato</h3>
-              <form className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-gray-300 text-sm mb-2">Nome Completo</label>
+                    <label className="block text-gray-300 text-sm mb-2">Nome Completo *</label>
                     <input 
                       type="text" 
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
                       className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-[30px] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent"
                       placeholder="Nome Completo"
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-300 text-sm mb-2">Email</label>
+                    <label className="block text-gray-300 text-sm mb-2">Email *</label>
                     <input 
                       type="email" 
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
                       className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-[30px] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-transparent"
                       placeholder="Email"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-gray-300 text-sm mb-2">Assunto</label>
+                  <label className="block text-gray-300 text-sm mb-2">Assunto *</label>
                   <input 
                     type="text" 
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    required
                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     placeholder="Assunto"
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-300 text-sm mb-2">Mensagem</label>
+                  <label className="block text-gray-300 text-sm mb-2">Mensagem *</label>
                   <textarea 
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    required
                     rows={4}
                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                     placeholder="Sua mensagem"
@@ -110,11 +158,31 @@ const LogicoStyleFooter = () => {
                 </div>
                 <button 
                   type="submit"
-                  className="w-full bg-primary-purple hover:bg-primary-purple-hover text-white font-semibold py-3 px-6 rounded-[30px] transition-colors flex items-center justify-center"
+                  disabled={isSubmitting}
+                  className="w-full bg-primary-purple hover:bg-primary-purple-hover text-white font-semibold py-3 px-6 rounded-[30px] transition-colors flex items-center justify-center disabled:opacity-50"
                 >
-                  Enviar Mensagem
+                  {isSubmitting ? 'Enviando...' : 'Enviar Mensagem'}
                   <ArrowRight size={20} className="ml-2" />
                 </button>
+
+                {/* Status Messages */}
+                {submitStatus === 'success' && (
+                  <div className="mt-4 p-4 bg-green-900 border border-green-700 rounded-lg flex items-center">
+                    <CheckCircle className="text-green-400 mr-2" size={20} />
+                    <span className="text-green-300 font-medium">
+                      Mensagem enviada com sucesso! Entraremos em contato em breve.
+                    </span>
+                  </div>
+                )}
+
+                {submitStatus === 'error' && (
+                  <div className="mt-4 p-4 bg-red-900 border border-red-700 rounded-lg flex items-center">
+                    <XCircle className="text-red-400 mr-2" size={20} />
+                    <span className="text-red-300 font-medium">
+                      Erro ao enviar mensagem. Tente novamente.
+                    </span>
+                  </div>
+                )}
               </form>
             </div>
           </div>
