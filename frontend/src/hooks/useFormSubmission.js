@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import emailService from '../services/emailService';
+import { sendContactEmail, sendShipperEmail, sendCarrierEmail, sendStockStoreEmail, sendDeliveryPersonEmail } from '../services/emailService';
 
 const useFormSubmission = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
