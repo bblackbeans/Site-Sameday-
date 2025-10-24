@@ -72,7 +72,7 @@ export const sendShipperEmail = async (formData) => {
     
     const result = await response.json();
     
-    if (result.success) {
+    if (result.message && result.shipper) {
       console.log('✅ Embarcador cadastrado com sucesso!', result);
       return { success: true, message: 'Cadastro realizado com sucesso!' };
     } else {
@@ -114,7 +114,7 @@ export const sendCarrierEmail = async (formData) => {
     
     const result = await response.json();
     
-    if (result.success) {
+    if (result.message && result.carrier) {
       console.log('✅ Transportador cadastrado com sucesso!', result);
       return { success: true, message: 'Cadastro realizado com sucesso!' };
     } else {
@@ -153,7 +153,7 @@ export const sendStockStoreEmail = async (formData) => {
     
     const result = await response.json();
     
-    if (result.success) {
+    if (result.message && result.partner) {
       console.log('✅ Stock Store cadastrado com sucesso!', result);
       return { success: true, message: 'Cadastro realizado com sucesso!' };
     } else {
