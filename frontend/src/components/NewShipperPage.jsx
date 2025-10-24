@@ -211,7 +211,7 @@ const NewShipperPage = () => {
                 Cadastre-se como Embarcador
               </h2>
               <p className="text-xl text-gray-600">
-                Preencha os dados abaixo e nossa equipe entrará em contato
+                Preencha os dados abaixo para realizar seu cadastro
               </p>
             </div>
 
@@ -363,7 +363,7 @@ const NewShipperPage = () => {
                     Documentos Necessários
                   </h4>
                   <p className="text-gray-700 mb-3">
-                    Após o envio do formulário, nossa equipe entrará em contato para solicitar:
+                    Após o cadastro, você receberá as informações de acesso:
                   </p>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-center">
@@ -419,7 +419,7 @@ const NewShipperPage = () => {
                   <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
                     <CheckCircle className="text-green-600 mr-2" size={20} />
                     <span className="text-green-800 font-medium">
-                      Cadastro enviado com sucesso! Entraremos em contato em breve.
+                      Cadastro realizado com sucesso!
                     </span>
                   </div>
                 )}

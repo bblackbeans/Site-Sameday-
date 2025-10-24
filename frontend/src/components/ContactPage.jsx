@@ -186,7 +186,7 @@ const ContactPage = () => {
                   Envie uma Mensagem
                 </h2>
                 <p className="text-gray-600 mb-8">
-                  Preencha o formulário abaixo e nossa equipe entrará em contato o mais breve possível.
+                  Preencha o formulário abaixo para enviar sua mensagem.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -301,7 +301,7 @@ const ContactPage = () => {
                     <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
                       <CheckCircle className="text-green-600 mr-2" size={20} />
                       <span className="text-green-800 font-medium">
-                        Mensagem enviada com sucesso! Entraremos em contato em breve.
+                        Mensagem enviada com sucesso!
                       </span>
                     </div>
                   )}

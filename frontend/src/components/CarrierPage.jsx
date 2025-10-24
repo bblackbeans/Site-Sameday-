@@ -546,7 +546,7 @@ const CarrierPage = () => {
                   <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
                     <CheckCircle className="text-green-600 mr-2" size={20} />
                     <span className="text-green-800 font-medium">
-                      Cadastro enviado com sucesso! Entraremos em contato em breve.
+                      Cadastro realizado com sucesso!
                     </span>
                   </div>
                 )}

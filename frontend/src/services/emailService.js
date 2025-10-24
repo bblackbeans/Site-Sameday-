@@ -46,16 +46,124 @@ export const sendContactEmail = async (formData) => {
   return await sendEmail(formData, 'contact');
 };
 
+// Função para cadastrar Embarcador
 export const sendShipperEmail = async (formData) => {
-  return await sendEmail(formData, 'embarcador');
+  try {
+    console.log('📧 Cadastrando Embarcador via API...');
+    console.log('📧 Dados:', formData);
+    
+    const response = await fetch(`${API_BASE_URL}/partners/shippers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        companyName: formData.companyName,
+        cnpj: formData.cnpj,
+        contactName: formData.contactName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        businessType: formData.businessType,
+        monthlyVolume: formData.monthlyVolume,
+        description: formData.description
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      console.log('✅ Embarcador cadastrado com sucesso!', result);
+      return { success: true, message: 'Cadastro realizado com sucesso!' };
+    } else {
+      throw new Error(result.message || 'Erro ao cadastrar embarcador');
+    }
+    
+  } catch (error) {
+    console.error('❌ Erro ao cadastrar embarcador:', error);
+    return { success: false, message: 'Erro ao cadastrar embarcador' };
+  }
 };
 
+// Função para cadastrar Transportador
 export const sendCarrierEmail = async (formData) => {
-  return await sendEmail(formData, 'transportador');
+  try {
+    console.log('📧 Cadastrando Transportador via API...');
+    console.log('📧 Dados:', formData);
+    
+    const response = await fetch(`${API_BASE_URL}/partners/carriers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        companyName: formData.companyName,
+        cnpj: formData.cnpj,
+        contactName: formData.contactName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        rntrc: formData.rntrc,
+        fleetSize: formData.fleetSize,
+        vehicleTypes: formData.vehicleTypes,
+        operationAreas: formData.operationAreas,
+        experience: formData.experience,
+        description: formData.description
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      console.log('✅ Transportador cadastrado com sucesso!', result);
+      return { success: true, message: 'Cadastro realizado com sucesso!' };
+    } else {
+      throw new Error(result.message || 'Erro ao cadastrar transportador');
+    }
+    
+  } catch (error) {
+    console.error('❌ Erro ao cadastrar transportador:', error);
+    return { success: false, message: 'Erro ao cadastrar transportador' };
+  }
 };
 
+// Função para cadastrar Stock Store
 export const sendStockStoreEmail = async (formData) => {
-  return await sendEmail(formData, 'stock-store');
+  try {
+    console.log('📧 Cadastrando Stock Store via API...');
+    console.log('📧 Dados:', formData);
+    
+    const response = await fetch(`${API_BASE_URL}/partners/stock-store`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ownerName: formData.ownerName,
+        email: formData.email,
+        phone: formData.phone,
+        cpfCnpj: formData.cpfCnpj,
+        propertyType: formData.propertyType,
+        address: formData.address,
+        spaceSize: formData.spaceSize,
+        availability: formData.availability,
+        description: formData.description
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      console.log('✅ Stock Store cadastrado com sucesso!', result);
+      return { success: true, message: 'Cadastro realizado com sucesso!' };
+    } else {
+      throw new Error(result.message || 'Erro ao cadastrar stock store');
+    }
+    
+  } catch (error) {
+    console.error('❌ Erro ao cadastrar stock store:', error);
+    return { success: false, message: 'Erro ao cadastrar stock store' };
+  }
 };
 
 export const sendDeliveryPersonEmail = async (formData) => {

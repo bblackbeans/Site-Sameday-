@@ -170,7 +170,7 @@ const LogicoStyleFooter = () => {
                   <div className="mt-4 p-4 bg-green-900 border border-green-700 rounded-lg flex items-center">
                     <CheckCircle className="text-green-400 mr-2" size={20} />
                     <span className="text-green-300 font-medium">
-                      Mensagem enviada com sucesso! Entraremos em contato em breve.
+                      Mensagem enviada com sucesso!
                     </span>
                   </div>
                 )}

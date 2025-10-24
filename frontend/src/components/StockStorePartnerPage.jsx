@@ -391,7 +391,7 @@ const StockStorePartnerPage = () => {
                 Formulário de Interesse
               </h2>
               <p className="text-xl text-gray-600">
-                Preencha os dados abaixo e nossa equipe entrará em contato
+                Preencha os dados abaixo para realizar seu cadastro
               </p>
             </div>
 
@@ -596,7 +596,7 @@ const StockStorePartnerPage = () => {
                   <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
                     <CheckCircle className="text-green-600 mr-2" size={20} />
                     <span className="text-green-800 font-medium">
-                      Interesse enviado com sucesso! Entraremos em contato em breve.
+                      Cadastro realizado com sucesso!
                     </span>
                   </div>
                 )}
