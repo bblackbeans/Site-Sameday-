@@ -133,43 +133,10 @@ const DeliveryPersonPage = () => {
         title="Seja um"
         subtitle="Entregador Parceiro"
         description="Ganhe dinheiro extra fazendo entregas na sua região com horários flexíveis e suporte completo da nossa equipe."
-        buttonText="App do Entregador (Em Breve)"
+        buttonText="App do Entregador"
         buttonLink="#portal"
       />
 
-      {/* Quick Access */}
-      <section className="py-12 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-r from-primary-purple-light to-primary-purple-light rounded-lg p-8">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Já é um entregador cadastrado?
-                </h2>
-                <p className="text-gray-600">
-                  O app do entregador estará disponível em breve para gerenciar suas entregas
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  className="bg-primary-purple hover:bg-primary-purple-hover"
-                >
-                  App do Entregador (Em Breve)
-                  <ArrowRight className="ml-2" size={20} />
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="border-primary-purple text-primary-purple hover:bg-primary-purple hover:text-white"
-                >
-                  Esqueci minha senha
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* How It Works */}
       <section className="py-20">
@@ -337,17 +304,17 @@ const DeliveryPersonPage = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              App do Entregador (Em Breve)
+              App do Entregador
             </h2>
             <p className="text-xl text-gray-600 mb-8">
-              O app do entregador estará disponível em breve para gerenciar suas entregas
+              Acesse o app para gerenciar suas entregas
             </p>
             <div className="flex justify-center">
               <Button 
                 size="lg" 
-                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-4"
+                className="bg-primary-purple hover:bg-primary-purple-hover text-white font-semibold px-8 py-4"
               >
-                App em Breve
+                Acessar App
                 <ExternalLink className="ml-2" size={20} />
               </Button>
             </div>
