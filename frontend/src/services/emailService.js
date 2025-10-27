@@ -71,12 +71,16 @@ export const sendShipperEmail = async (formData) => {
     });
     
     const result = await response.json();
+    console.log('📦 Resposta da API do embarcador:', result);
     
     // Verifica se a mensagem contém "sucesso" ou se tem o objeto shipper
-    if ((result.message && result.message.includes('sucesso')) || result.shipper) {
+    const isSuccess = (result.message && result.message.includes('sucesso')) || result.shipper;
+    
+    if (isSuccess) {
       console.log('✅ Embarcador cadastrado com sucesso!', result);
       return { success: true, message: 'Cadastro realizado com sucesso!' };
     } else {
+      console.log('❌ Resposta não é sucesso:', result);
       throw new Error(result.message || 'Erro ao cadastrar embarcador');
     }
     
