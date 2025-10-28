@@ -60,12 +60,24 @@ const StorageSimulator = () => {
     // Encontrar categoria usando configuração
     for (const category of STORAGE_CONFIG.categories) {
       if (volume <= category.maxVolume) {
-        return { name: category.name, price: category.pricePerUnit };
+        return { 
+          name: category.name, 
+          price: category.pricePerUnit,
+          pricePerMonth: category.pricePerMonth,
+          examples: category.examples,
+          strategy: category.strategy
+        };
       }
     }
     // Fallback para última categoria
     const lastCategory = STORAGE_CONFIG.categories[STORAGE_CONFIG.categories.length - 1];
-    return { name: lastCategory.name, price: lastCategory.pricePerUnit };
+    return { 
+      name: lastCategory.name, 
+      price: lastCategory.pricePerUnit,
+      pricePerMonth: lastCategory.pricePerMonth,
+      examples: lastCategory.examples,
+      strategy: lastCategory.strategy
+    };
   };
 
   const calculateStorage = (e) => {
