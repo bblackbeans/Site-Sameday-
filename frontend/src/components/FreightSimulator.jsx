@@ -128,10 +128,32 @@ const FreightSimulator = () => {
       // 8. Calcular prazo (simulado)
       const deliveryTime = isFTL ? '3-5 dias úteis' : '2-4 dias úteis';
       
-      // 9. Simular distância
+      // 9. Calcular distância de forma consistente (baseada nos CEPs)
       const isSameState = originState === destState;
-      const distanceRange = isSameState ? FREIGHT_CONFIG.simulatedDistances.sameState : FREIGHT_CONFIG.simulatedDistances.differentState;
-      const distance = Math.floor(Math.random() * (distanceRange.max - distanceRange.min) + distanceRange.min);
+      
+      // Mapear rotas conhecidas com distâncias fixas
+      const knownRoutes = {
+        'SP-SP': 150,    // São Paulo → São Paulo
+        'SP-RJ': 430,    // São Paulo → Rio de Janeiro
+        'SP-MG': 600,    // São Paulo → Minas Gerais
+        'SP-DF': 1000,   // São Paulo → Brasília
+        'RJ-MG': 400,    // Rio de Janeiro → Minas Gerais
+      };
+      
+      const routeKey = `${originState}-${destState}`;
+      let distance;
+      
+      if (knownRoutes[routeKey]) {
+        distance = knownRoutes[routeKey];
+      } else if (isSameState) {
+        // Mesma origem e destino = mesma cidade (50-200 km)
+        const cepDistance = Math.abs(parseInt(originState.substring(2, 5)) - parseInt(destState.substring(2, 5)));
+        distance = Math.max(50, Math.min(200, cepDistance));
+      } else {
+        // Estados diferentes (500-1000 km)
+        const stateDiff = Math.abs(parseInt(originState) - parseInt(destState));
+        distance = Math.max(400, Math.min(1000, stateDiff * 50 + 300));
+      }
       
       setResult({
         price: totalFreight.toFixed(2),
