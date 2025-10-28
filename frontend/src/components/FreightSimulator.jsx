@@ -57,53 +57,90 @@ const FreightSimulator = () => {
     e.preventDefault();
     setIsCalculating(true);
     
-    // Simulação de cálculo mais realista
+    // Simulação de cálculo usando novo modelo 2025
     setTimeout(() => {
       const weight = parseFloat(formData.weight);
       const { length, width, height } = formData.dimensions;
       
-      // Calcular volume em m³
-      const volume = (parseFloat(length) * parseFloat(width) * parseFloat(height)) / 1000000;
+      // 1. Calcular peso cubado (LTL) usando divisor 6000 (padrão ANTT)
+      const volumetricWeight = (parseFloat(length) * parseFloat(width) * parseFloat(height)) / FREIGHT_CONFIG.volumetricWeightDivisor;
       
-      // Calcular peso volumétrico usando configuração
-      const volumetricWeight = volume * FREIGHT_CONFIG.volumetricWeightFactor;
-      const chargeableWeight = Math.max(weight, volumetricWeight);
+      // 2. Peso taxado = max(peso real, peso cubado)
+      const taxedWeight = Math.max(weight, volumetricWeight);
       
-      // Simular distância baseada nos CEPs
-      const originRegion = formData.origin.substring(0, 2);
-      const destinationRegion = formData.destination.substring(0, 2);
+      // 3. Determinar se é LTL ou FTL
+      const isFTL = weight > 1000;
       
-      // Determinar fator regional usando configuração
-      let regionFactor = FREIGHT_CONFIG.regionFactors.distantState;
-      if (originRegion === destinationRegion) {
-        regionFactor = FREIGHT_CONFIG.regionFactors.sameState;
-      } else if (Math.abs(parseInt(originRegion) - parseInt(destinationRegion)) <= 1) {
-        regionFactor = FREIGHT_CONFIG.regionFactors.neighborState;
+      let baseFreight = 0;
+      let selectedVehicle = null;
+      
+      if (isFTL) {
+        // Modo FTL - Cálculo por km e tipo de veículo
+        const distance = 400; // Simulação (será melhorado com APIs reais)
+        
+        // Selecionar veículo baseado no peso
+        for (const [vehicleName, vehicleData] of Object.entries(FREIGHT_CONFIG.vehicleRates)) {
+          if (weight <= vehicleData.capacity) {
+            selectedVehicle = { name: vehicleName, ...vehicleData };
+            break;
+          }
+        }
+        
+        if (!selectedVehicle) {
+          selectedVehicle = FREIGHT_CONFIG.vehicleRates.Rodotrem;
+        }
+        
+        baseFreight = distance * selectedVehicle.rate;
+      } else {
+        // Modo LTL - Cálculo por kg
+        let ratePerKg = FREIGHT_CONFIG.weightBasedRates.above1000;
+        
+        if (weight <= 100) {
+          ratePerKg = FREIGHT_CONFIG.weightBasedRates.upTo100;
+        } else if (weight <= 300) {
+          ratePerKg = FREIGHT_CONFIG.weightBasedRates.upTo300;
+        } else if (weight <= 600) {
+          ratePerKg = FREIGHT_CONFIG.weightBasedRates.upTo600;
+        } else if (weight <= 1000) {
+          ratePerKg = FREIGHT_CONFIG.weightBasedRates.upTo1000;
+        }
+        
+        baseFreight = taxedWeight * ratePerKg;
       }
       
-      // Cálculo do frete usando configuração
-      const basePrice = FREIGHT_CONFIG.basePrice;
-      const weightPrice = chargeableWeight * regionFactor;
-      const serviceMultiplier = FREIGHT_CONFIG.serviceMultipliers[formData.serviceType] || 1.0;
+      // 4. Calcular pedágio (simulado)
+      const originState = formData.origin.substring(0, 2);
+      const destState = formData.destination.substring(0, 2);
+      const routeKey = `${originState}-${destState}`;
+      const toll = FREIGHT_CONFIG.tollRoutes[routeKey] || (500 * FREIGHT_CONFIG.defaultTollRate);
       
-      const totalPrice = (basePrice + weightPrice) * serviceMultiplier;
+      // 5. Adicionais (serão implementados quando houver campos no formulário)
+      const fragileCharge = baseFreight * FREIGHT_CONFIG.additionalCharges.fragile;
+      const urgentCharge = baseFreight * FREIGHT_CONFIG.additionalCharges.urgent;
       
-      // Calcular prazo usando configuração
-      const isSameState = originRegion === destinationRegion;
-      const timeConfig = isSameState ? FREIGHT_CONFIG.deliveryTimes.sameState : FREIGHT_CONFIG.deliveryTimes.differentState;
-      const deliveryTime = timeConfig[formData.serviceType] || timeConfig.standard;
+      // 6. GRIS (será implementado quando houver campo de valor da NF)
+      const gris = 0; // placeholder
       
-      // Simular distância usando configuração
-      const distanceRange = isSameState ? FREIGHT_CONFIG.distances.sameState : FREIGHT_CONFIG.distances.differentState;
+      // 7. Frete Total
+      const totalFreight = baseFreight + toll + fragileCharge + urgentCharge + gris;
+      
+      // 8. Calcular prazo (simulado)
+      const deliveryTime = isFTL ? '3-5 dias úteis' : '2-4 dias úteis';
+      
+      // 9. Simular distância
+      const isSameState = originState === destState;
+      const distanceRange = isSameState ? FREIGHT_CONFIG.simulatedDistances.sameState : FREIGHT_CONFIG.simulatedDistances.differentState;
       const distance = Math.floor(Math.random() * (distanceRange.max - distanceRange.min) + distanceRange.min);
       
       setResult({
-        price: totalPrice.toFixed(2),
+        price: totalFreight.toFixed(2),
         deliveryTime,
         distance: distance + ' km',
-        weight: chargeableWeight.toFixed(2) + ' kg',
-        volume: volume.toFixed(4) + ' m³',
-        regionFactor: regionFactor.toFixed(1) + 'x'
+        taxedWeight: taxedWeight.toFixed(2) + ' kg',
+        volumetricWeight: volumetricWeight.toFixed(2) + ' kg',
+        realWeight: weight.toFixed(2) + ' kg',
+        mode: isFTL ? 'FTL (Carga Completa)' : 'LTL (Carga Fracionada)',
+        vehicle: selectedVehicle ? selectedVehicle.name : null
       });
       setIsCalculating(false);
     }, 2000);
@@ -311,6 +348,16 @@ const FreightSimulator = () => {
                       
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Modalidade:</span>
+                          <span className="font-semibold">{result.mode}</span>
+                        </div>
+                        {result.vehicle && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600">Veículo:</span>
+                            <span className="font-semibold">{result.vehicle}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between">
                           <span className="text-gray-600">Prazo de entrega:</span>
                           <span className="font-semibold">{result.deliveryTime}</span>
                         </div>
@@ -319,16 +366,16 @@ const FreightSimulator = () => {
                           <span className="font-semibold">{result.distance}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Peso cobrável:</span>
-                          <span className="font-semibold">{result.weight}</span>
+                          <span className="text-gray-600">Peso taxado:</span>
+                          <span className="font-semibold">{result.taxedWeight}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Volume:</span>
-                          <span className="font-semibold">{result.volume}</span>
+                          <span className="text-gray-600">Peso real:</span>
+                          <span className="font-semibold">{result.realWeight}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Fator regional:</span>
-                          <span className="font-semibold">{result.regionFactor}</span>
+                          <span className="text-gray-600">Peso cubado:</span>
+                          <span className="font-semibold">{result.volumetricWeight}</span>
                         </div>
                       </div>
                       
