@@ -58,25 +58,29 @@ const StorageSimulator = () => {
 
   const getCategory = (volume) => {
     // Encontrar categoria usando configuração
-    for (const category of STORAGE_CONFIG.categories) {
-      if (volume <= category.maxVolume) {
-        return { 
-          name: category.name, 
-          price: category.pricePerUnit,
-          pricePerMonth: category.pricePerMonth,
-          examples: category.examples,
-          strategy: category.strategy
-        };
+    // Percorre as categorias e encontra a que o volume se encaixa
+    let selectedCategory = STORAGE_CONFIG.categories[STORAGE_CONFIG.categories.length - 1];
+    
+    for (let i = 0; i < STORAGE_CONFIG.categories.length; i++) {
+      const category = STORAGE_CONFIG.categories[i];
+      const prevCategory = i > 0 ? STORAGE_CONFIG.categories[i - 1] : null;
+      
+      // Verifica se o volume está dentro da faixa desta categoria
+      const minVolume = prevCategory ? prevCategory.maxVolume : 0;
+      const maxVolume = category.maxVolume === Infinity ? Infinity : category.maxVolume;
+      
+      if (volume > minVolume && volume <= maxVolume) {
+        selectedCategory = category;
+        break;
       }
     }
-    // Fallback para última categoria
-    const lastCategory = STORAGE_CONFIG.categories[STORAGE_CONFIG.categories.length - 1];
+    
     return { 
-      name: lastCategory.name, 
-      price: lastCategory.pricePerUnit,
-      pricePerMonth: lastCategory.pricePerMonth,
-      examples: lastCategory.examples,
-      strategy: lastCategory.strategy
+      name: selectedCategory.name, 
+      price: selectedCategory.pricePerUnit,
+      pricePerMonth: selectedCategory.pricePerMonth,
+      examples: selectedCategory.examples,
+      strategy: selectedCategory.strategy
     };
   };
 

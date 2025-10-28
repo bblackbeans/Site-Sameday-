@@ -114,9 +114,10 @@ const FreightSimulator = () => {
       const routeKey = `${originState}-${destState}`;
       const toll = FREIGHT_CONFIG.tollRoutes[routeKey] || (500 * FREIGHT_CONFIG.defaultTollRate);
       
-      // 5. Adicionais (serão implementados quando houver campos no formulário)
-      const fragileCharge = baseFreight * FREIGHT_CONFIG.additionalCharges.fragile;
-      const urgentCharge = baseFreight * FREIGHT_CONFIG.additionalCharges.urgent;
+      // 5. Adicionais (só aplicar quando usuário selecionar)
+      // Por enquanto, não aplicar adicionais automaticamente
+      const fragileCharge = 0;
+      const urgentCharge = 0;
       
       // 6. GRIS (será implementado quando houver campo de valor da NF)
       const gris = 0; // placeholder
