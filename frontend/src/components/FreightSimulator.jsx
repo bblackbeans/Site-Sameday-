@@ -22,20 +22,27 @@ const FreightSimulator = () => {
   const [formData, setFormData] = useState({
     origin: '',
     destination: '',
+    distance: '',
     weight: '',
+    invoiceValue: '',
     dimensions: {
       length: '',
       width: '',
       height: ''
     },
-    serviceType: 'standard'
+    serviceType: 'standard',
+    dedicatedVehicle: false,
+    isFragile: false,
+    isPerishable: false,
+    isUrgent: false,
+    withGris: true
   });
 
   const [result, setResult] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     if (name.includes('dimensions.')) {
       const dimension = name.split('.')[1];
       setFormData(prev => ({
@@ -45,11 +52,41 @@ const FreightSimulator = () => {
           [dimension]: value
         }
       }));
-    } else {
+    } else if (type === 'checkbox') {
       setFormData(prev => ({
         ...prev,
-        [name]: value
+        [name]: checked
       }));
+    } else {
+      setFormData(prev => {
+        const newData = {
+          ...prev,
+          [name]: value
+        };
+        
+        // Auto-atualizar distância quando CEPs mudarem (se distância não foi editada manualmente)
+        if ((name === 'origin' || name === 'destination') && !prev.distance) {
+          if (newData.origin.length >= 2 && newData.destination.length >= 2) {
+            const originState = newData.origin.substring(0, 2);
+            const destState = newData.destination.substring(0, 2);
+            const routeKey = `${originState}-${destState}`;
+            
+            const knownRoutes = {
+              'SP-SP': 150,
+              'SP-RJ': 430,
+              'SP-MG': 600,
+              'SP-DF': 1000,
+              'RJ-MG': 400,
+            };
+            
+            if (knownRoutes[routeKey]) {
+              newData.distance = knownRoutes[routeKey].toString();
+            }
+          }
+        }
+        
+        return newData;
+      });
     }
   };
 
@@ -72,37 +109,44 @@ const FreightSimulator = () => {
       // 2. Peso taxado = max(peso real, peso cubado)
       const taxedWeight = Math.max(weight, volumetricWeight);
       
-      // 3. Calcular distância PRIMEIRO (baseada nos CEPs)
+      // 3. Calcular distância PRIMEIRO (usar do formulário ou calcular)
       const originState = formData.origin.substring(0, 2);
       const destState = formData.destination.substring(0, 2);
       const routeKey = `${originState}-${destState}`;
-      const isSameState = originState === destState;
-      
-      // Mapear rotas conhecidas com distâncias fixas
-      const knownRoutes = {
-        'SP-SP': 150,    // São Paulo → São Paulo
-        'SP-RJ': 430,    // São Paulo → Rio de Janeiro
-        'SP-MG': 600,    // São Paulo → Minas Gerais
-        'SP-DF': 1000,   // São Paulo → Brasília
-        'RJ-MG': 400,    // Rio de Janeiro → Minas Gerais
-      };
-      
       let distance;
       
-      if (knownRoutes[routeKey]) {
-        distance = knownRoutes[routeKey];
-      } else if (isSameState) {
-        // Mesma origem e destino = mesma cidade (50-200 km)
-        const cepDistance = Math.abs(parseInt(originState.substring(2, 5)) - parseInt(destState.substring(2, 5)));
-        distance = Math.max(50, Math.min(200, cepDistance));
+      // Se distância foi fornecida pelo usuário, usar ela
+      if (formData.distance && parseFloat(formData.distance) > 0) {
+        distance = parseFloat(formData.distance);
       } else {
-        // Estados diferentes (500-1000 km)
-        const stateDiff = Math.abs(parseInt(originState) - parseInt(destState));
-        distance = Math.max(400, Math.min(1000, stateDiff * 50 + 300));
+        // Senão, calcular automaticamente baseada nos CEPs
+        const isSameState = originState === destState;
+        
+        // Mapear rotas conhecidas com distâncias fixas
+        const knownRoutes = {
+          'SP-SP': 150,    // São Paulo → São Paulo
+          'SP-RJ': 430,    // São Paulo → Rio de Janeiro
+          'SP-MG': 600,    // São Paulo → Minas Gerais
+          'SP-DF': 1000,   // São Paulo → Brasília
+          'RJ-MG': 400,    // Rio de Janeiro → Minas Gerais
+        };
+        
+        if (knownRoutes[routeKey]) {
+          distance = knownRoutes[routeKey];
+        } else if (isSameState) {
+          // Mesma origem e destino = mesma cidade (50-200 km)
+          const cepDistance = Math.abs(parseInt(originState.substring(2, 5)) - parseInt(destState.substring(2, 5)));
+          distance = Math.max(50, Math.min(200, cepDistance));
+        } else {
+          // Estados diferentes (500-1000 km)
+          const stateDiff = Math.abs(parseInt(originState) - parseInt(destState));
+          distance = Math.max(400, Math.min(1000, stateDiff * 50 + 300));
+        }
       }
       
       // 4. Determinar se é LTL ou FTL
-      const isFTL = weight > 1000;
+      // Forçar FTL se checkbox marcado OU se peso > 1000kg
+      const isFTL = formData.dedicatedVehicle || weight > 1000;
       
       let baseFreight = 0;
       let selectedVehicle = null;
@@ -151,16 +195,17 @@ const FreightSimulator = () => {
       // 6. Calcular pedágio
       const toll = FREIGHT_CONFIG.tollRoutes[routeKey] || (distance * FREIGHT_CONFIG.defaultTollRate);
       
-      // 7. Adicionais (só aplicar quando usuário selecionar)
-      // Por enquanto, não aplicar adicionais automaticamente
-      const fragileCharge = 0;
-      const urgentCharge = 0;
+      // 7. Adicionais (aplicar apenas se checkboxes marcados)
+      const fragileCharge = formData.isFragile ? baseFreight * FREIGHT_CONFIG.additionalCharges.fragile : 0;
+      const perishableCharge = formData.isPerishable ? baseFreight * FREIGHT_CONFIG.additionalCharges.perishable : 0;
+      const urgentCharge = formData.isUrgent ? baseFreight * FREIGHT_CONFIG.additionalCharges.urgent : 0;
       
-      // 8. GRIS (será implementado quando houver campo de valor da NF)
-      const gris = 0; // placeholder
+      // 8. GRIS (aplicar se checkbox marcado e valor da NF fornecido)
+      const invoiceValue = parseFloat(formData.invoiceValue || 0);
+      const gris = (formData.withGris && invoiceValue > 0) ? invoiceValue * FREIGHT_CONFIG.grisRate : 0;
       
       // 9. Frete Total
-      const totalFreight = baseFreight + toll + fragileCharge + urgentCharge + gris;
+      const totalFreight = baseFreight + toll + fragileCharge + perishableCharge + urgentCharge + gris;
       
       // 10. Calcular prazo baseado no tipo de serviço
       const deliveryTime = formData.serviceType === 'express' 
@@ -175,7 +220,14 @@ const FreightSimulator = () => {
         volumetricWeight: volumetricWeight.toFixed(2) + ' kg',
         realWeight: weight.toFixed(2) + ' kg',
         mode: isFTL ? 'FTL (Carga Completa)' : 'LTL (Carga Fracionada)',
-        vehicle: selectedVehicle ? selectedVehicle.name : null
+        vehicle: selectedVehicle ? selectedVehicle.name : null,
+        baseFreight: baseFreight.toFixed(2),
+        toll: toll.toFixed(2),
+        fragileCharge: fragileCharge.toFixed(2),
+        perishableCharge: perishableCharge.toFixed(2),
+        urgentCharge: urgentCharge.toFixed(2),
+        gris: gris.toFixed(2),
+        hasAdditions: fragileCharge > 0 || perishableCharge > 0 || urgentCharge > 0 || gris > 0
       });
       setIsCalculating(false);
     }, 2000);
@@ -260,22 +312,59 @@ const FreightSimulator = () => {
                       </div>
                     </div>
 
-                    {/* Weight */}
+                    {/* Distance (Optional) */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <Package className="inline mr-2" size={16} />
-                        Peso (kg) *
+                        <MapPin className="inline mr-2" size={16} />
+                        Distância Aproximada (km) <span className="text-gray-400 text-xs">(opcional)</span>
                       </label>
                       <Input
                         type="number"
-                        name="weight"
-                        value={formData.weight}
+                        name="distance"
+                        value={formData.distance}
                         onChange={handleInputChange}
-                        required
-                        placeholder="0.0"
-                        min="0.1"
-                        step="0.1"
+                        placeholder="Deixe vazio para cálculo automático"
+                        min="1"
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        💡 Se não informar, a distância será calculada automaticamente
+                      </p>
+                    </div>
+
+                    {/* Weight and Invoice Value */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <Package className="inline mr-2" size={16} />
+                          Peso (kg) *
+                        </label>
+                        <Input
+                          type="number"
+                          name="weight"
+                          value={formData.weight}
+                          onChange={handleInputChange}
+                          required
+                          placeholder="0.0"
+                          min="0.1"
+                          step="0.1"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <DollarSign className="inline mr-2" size={16} />
+                          Valor da Nota Fiscal (R$) *
+                        </label>
+                        <Input
+                          type="number"
+                          name="invoiceValue"
+                          value={formData.invoiceValue}
+                          onChange={handleInputChange}
+                          required
+                          placeholder="0.00"
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
                     </div>
 
                     {/* Dimensions */}
@@ -308,6 +397,82 @@ const FreightSimulator = () => {
                           placeholder="Altura"
                           min="1"
                         />
+                      </div>
+                    </div>
+
+                    {/* Dedicated Vehicle Checkbox */}
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="dedicatedVehicle"
+                          checked={formData.dedicatedVehicle}
+                          onChange={handleInputChange}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <span className="ml-3 text-sm font-medium text-gray-700">
+                          Solicitar Veículo Dedicado (FTL)
+                        </span>
+                      </label>
+                      <p className="text-xs text-gray-500 mt-1 ml-7">
+                        Força o uso de modalidade FTL independente do peso
+                      </p>
+                    </div>
+
+                    {/* Additional Charges */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Características da Carga:
+                      </label>
+                      <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            name="isFragile"
+                            checked={formData.isFragile}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <span className="ml-3 text-sm text-gray-700">
+                            🔧 Carga Frágil <span className="text-gray-500">(+3%)</span>
+                          </span>
+                        </label>
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            name="isPerishable"
+                            checked={formData.isPerishable}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <span className="ml-3 text-sm text-gray-700">
+                            ❄️ Carga Perecível <span className="text-gray-500">(+3%)</span>
+                          </span>
+                        </label>
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            name="isUrgent"
+                            checked={formData.isUrgent}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <span className="ml-3 text-sm text-gray-700">
+                            ⚡ Entrega Urgente <span className="text-gray-500">(+15%)</span>
+                          </span>
+                        </label>
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            name="withGris"
+                            checked={formData.withGris}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <span className="ml-3 text-sm text-gray-700">
+                            🛡️ Incluir Seguro GRIS <span className="text-gray-500">(0,3% do valor da NF)</span>
+                          </span>
+                        </label>
                       </div>
                     </div>
 
@@ -397,7 +562,7 @@ const FreightSimulator = () => {
                           <span className="font-semibold">{result.deliveryTime}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Distância estimada:</span>
+                          <span className="text-gray-600">Distância:</span>
                           <span className="font-semibold">{result.distance}</span>
                         </div>
                         <div className="flex items-center justify-between">
@@ -412,6 +577,46 @@ const FreightSimulator = () => {
                           <span className="text-gray-600">Peso cubado:</span>
                           <span className="font-semibold">{result.volumetricWeight}</span>
                         </div>
+                        
+                        {result.hasAdditions && (
+                          <div className="pt-3 mt-3 border-t border-gray-200">
+                            <p className="text-xs text-gray-500 mb-2">Detalhamento:</p>
+                            <div className="space-y-1 text-xs">
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-600">Frete base:</span>
+                                <span className="font-semibold">R$ {result.baseFreight}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-600">Pedágio:</span>
+                                <span className="font-semibold">R$ {result.toll}</span>
+                              </div>
+                              {parseFloat(result.fragileCharge) > 0 && (
+                                <div className="flex items-center justify-between text-orange-600">
+                                  <span>Carga Frágil (+3%):</span>
+                                  <span className="font-semibold">R$ {result.fragileCharge}</span>
+                                </div>
+                              )}
+                              {parseFloat(result.perishableCharge) > 0 && (
+                                <div className="flex items-center justify-between text-blue-600">
+                                  <span>Carga Perecível (+3%):</span>
+                                  <span className="font-semibold">R$ {result.perishableCharge}</span>
+                                </div>
+                              )}
+                              {parseFloat(result.urgentCharge) > 0 && (
+                                <div className="flex items-center justify-between text-red-600">
+                                  <span>Entrega Urgente (+15%):</span>
+                                  <span className="font-semibold">R$ {result.urgentCharge}</span>
+                                </div>
+                              )}
+                              {parseFloat(result.gris) > 0 && (
+                                <div className="flex items-center justify-between text-green-600">
+                                  <span>GRIS (0,3% NF):</span>
+                                  <span className="font-semibold">R$ {result.gris}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="pt-4 border-t">
