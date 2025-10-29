@@ -55,11 +55,15 @@ const FreightSimulator = () => {
 
   const calculateFreight = (e) => {
     e.preventDefault();
+    
+    // Limpar resultado anterior para garantir recalculo
+    setResult(null);
     setIsCalculating(true);
     
     // Simulação de cálculo usando novo modelo 2025
+    // Sempre usar valores atuais do formulário
     setTimeout(() => {
-      const weight = parseFloat(formData.weight);
+      const weight = parseFloat(formData.weight || 0);
       const { length, width, height } = formData.dimensions;
       
       // 1. Calcular peso cubado (LTL) usando divisor 6000 (padrão ANTT)

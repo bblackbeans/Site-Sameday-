@@ -86,14 +86,18 @@ const StorageSimulator = () => {
 
   const calculateStorage = (e) => {
     e.preventDefault();
+    
+    // Limpar resultado anterior para garantir recalculo
+    setResult(null);
     setIsCalculating(true);
     
+    // Sempre usar valores atuais do formulário
     setTimeout(() => {
       const { length, width, height } = formData.dimensions;
       const volume = calculateVolume(
-        parseFloat(length), 
-        parseFloat(width), 
-        parseFloat(height)
+        parseFloat(length || 0), 
+        parseFloat(width || 0), 
+        parseFloat(height || 0)
       );
       
       const category = getCategory(volume);
