@@ -63,21 +63,48 @@ const FreightSimulator = () => {
       const { length, width, height } = formData.dimensions;
       
       // 1. Calcular peso cubado (LTL) usando divisor 6000 (padrão ANTT)
-      const volumetricWeight = (parseFloat(length) * parseFloat(width) * parseFloat(height)) / FREIGHT_CONFIG.volumetricWeightDivisor;
+      const volumetricWeight = (parseFloat(length || 0) * parseFloat(width || 0) * parseFloat(height || 0)) / FREIGHT_CONFIG.volumetricWeightDivisor;
       
       // 2. Peso taxado = max(peso real, peso cubado)
       const taxedWeight = Math.max(weight, volumetricWeight);
       
-      // 3. Determinar se é LTL ou FTL
+      // 3. Calcular distância PRIMEIRO (baseada nos CEPs)
+      const originState = formData.origin.substring(0, 2);
+      const destState = formData.destination.substring(0, 2);
+      const routeKey = `${originState}-${destState}`;
+      const isSameState = originState === destState;
+      
+      // Mapear rotas conhecidas com distâncias fixas
+      const knownRoutes = {
+        'SP-SP': 150,    // São Paulo → São Paulo
+        'SP-RJ': 430,    // São Paulo → Rio de Janeiro
+        'SP-MG': 600,    // São Paulo → Minas Gerais
+        'SP-DF': 1000,   // São Paulo → Brasília
+        'RJ-MG': 400,    // Rio de Janeiro → Minas Gerais
+      };
+      
+      let distance;
+      
+      if (knownRoutes[routeKey]) {
+        distance = knownRoutes[routeKey];
+      } else if (isSameState) {
+        // Mesma origem e destino = mesma cidade (50-200 km)
+        const cepDistance = Math.abs(parseInt(originState.substring(2, 5)) - parseInt(destState.substring(2, 5)));
+        distance = Math.max(50, Math.min(200, cepDistance));
+      } else {
+        // Estados diferentes (500-1000 km)
+        const stateDiff = Math.abs(parseInt(originState) - parseInt(destState));
+        distance = Math.max(400, Math.min(1000, stateDiff * 50 + 300));
+      }
+      
+      // 4. Determinar se é LTL ou FTL
       const isFTL = weight > 1000;
       
       let baseFreight = 0;
       let selectedVehicle = null;
       
       if (isFTL) {
-        // Modo FTL - Cálculo por km e tipo de veículo
-        const distance = 400; // Simulação (será melhorado com APIs reais)
-        
+        // Modo FTL - Cálculo por km e tipo de veículo (usando distância calculada)
         // Selecionar veículo baseado no peso
         for (const [vehicleName, vehicleData] of Object.entries(FREIGHT_CONFIG.vehicleRates)) {
           if (weight <= vehicleData.capacity) {
@@ -108,52 +135,33 @@ const FreightSimulator = () => {
         baseFreight = taxedWeight * ratePerKg;
       }
       
-      // 4. Calcular pedágio (simulado)
-      const originState = formData.origin.substring(0, 2);
-      const destState = formData.destination.substring(0, 2);
-      const routeKey = `${originState}-${destState}`;
-      const toll = FREIGHT_CONFIG.tollRoutes[routeKey] || (500 * FREIGHT_CONFIG.defaultTollRate);
+      // 5. Aplicar multiplicador do tipo de serviço (Padrão/Expresso)
+      const serviceMultipliers = {
+        standard: 1.0,   // Padrão
+        express: 1.8     // Expresso (80% mais caro)
+      };
       
-      // 5. Adicionais (só aplicar quando usuário selecionar)
+      const serviceMultiplier = serviceMultipliers[formData.serviceType] || 1.0;
+      baseFreight = baseFreight * serviceMultiplier;
+      
+      // 6. Calcular pedágio
+      const toll = FREIGHT_CONFIG.tollRoutes[routeKey] || (distance * FREIGHT_CONFIG.defaultTollRate);
+      
+      // 7. Adicionais (só aplicar quando usuário selecionar)
       // Por enquanto, não aplicar adicionais automaticamente
       const fragileCharge = 0;
       const urgentCharge = 0;
       
-      // 6. GRIS (será implementado quando houver campo de valor da NF)
+      // 8. GRIS (será implementado quando houver campo de valor da NF)
       const gris = 0; // placeholder
       
-      // 7. Frete Total
+      // 9. Frete Total
       const totalFreight = baseFreight + toll + fragileCharge + urgentCharge + gris;
       
-      // 8. Calcular prazo (simulado)
-      const deliveryTime = isFTL ? '3-5 dias úteis' : '2-4 dias úteis';
-      
-      // 9. Calcular distância de forma consistente (baseada nos CEPs)
-      const isSameState = originState === destState;
-      
-      // Mapear rotas conhecidas com distâncias fixas
-      const knownRoutes = {
-        'SP-SP': 150,    // São Paulo → São Paulo
-        'SP-RJ': 430,    // São Paulo → Rio de Janeiro
-        'SP-MG': 600,    // São Paulo → Minas Gerais
-        'SP-DF': 1000,   // São Paulo → Brasília
-        'RJ-MG': 400,    // Rio de Janeiro → Minas Gerais
-      };
-      
-      const routeKey = `${originState}-${destState}`;
-      let distance;
-      
-      if (knownRoutes[routeKey]) {
-        distance = knownRoutes[routeKey];
-      } else if (isSameState) {
-        // Mesma origem e destino = mesma cidade (50-200 km)
-        const cepDistance = Math.abs(parseInt(originState.substring(2, 5)) - parseInt(destState.substring(2, 5)));
-        distance = Math.max(50, Math.min(200, cepDistance));
-      } else {
-        // Estados diferentes (500-1000 km)
-        const stateDiff = Math.abs(parseInt(originState) - parseInt(destState));
-        distance = Math.max(400, Math.min(1000, stateDiff * 50 + 300));
-      }
+      // 10. Calcular prazo baseado no tipo de serviço
+      const deliveryTime = formData.serviceType === 'express' 
+        ? (isFTL ? '2-3 dias úteis' : '1-2 dias úteis')
+        : (isFTL ? '3-5 dias úteis' : '2-4 dias úteis');
       
       setResult({
         price: totalFreight.toFixed(2),
